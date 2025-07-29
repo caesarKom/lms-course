@@ -11,12 +11,16 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth-client";
-import { GithubIcon, Loader2 } from "lucide-react";
-import { useTransition } from "react";
+import { GithubIcon, Loader2, SendIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
 export const LoginForm = () => {
-  const [isGithubPending, startGithubTransaction] = useTransition();
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [githubPending, startGithubTransaction] = useTransition();
+  const [emailPending, startEmailTransaction] = useTransition();
 
   async function signInWithGithub() {
     startGithubTransaction(async () => {
@@ -35,6 +39,24 @@ export const LoginForm = () => {
     });
   }
 
+  function signInWithEmail() {
+    startEmailTransaction(async () => {
+      await authClient.emailOtp.sendVerificationOtp({
+        email: email,
+        type: "sign-in",
+        fetchOptions: {
+          onSuccess: () => {
+            toast.success("Email sent");
+            router.push(`/verify-request?email=${email}`);
+          },
+          onError: () => {
+            toast.error("Error sending email");
+          },
+        },
+      });
+    });
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -44,12 +66,12 @@ export const LoginForm = () => {
 
       <CardContent className="flex flex-col gap-4">
         <Button
-          disabled={isGithubPending}
+          disabled={githubPending}
           onClick={signInWithGithub}
           className="w-full"
           variant="outline"
         >
-          {isGithubPending ? (
+          {githubPending ? (
             <>
               <Loader2 className="size-4 animate-spin" />
               <span>Loading...</span>
@@ -71,9 +93,27 @@ export const LoginForm = () => {
         <div className="grid gap-3">
           <div className="grid gap-2">
             <Label htmlFor="email">Email</Label>
-            <Input type="email" placeholder="john@example.com" />
+            <Input
+              type="email"
+              placeholder="john@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
           </div>
-          <Button>Continue with Email</Button>
+          <Button onClick={signInWithEmail} disabled={emailPending}>
+            {emailPending ? (
+              <>
+                <Loader2 className="size-4 animate-spin" />
+                <span>Loading...</span>
+              </>
+            ) : (
+              <>
+                <SendIcon className="size-4" />
+                <span>Continue with Email</span>
+              </>
+            )}
+          </Button>
         </div>
       </CardContent>
     </Card>
