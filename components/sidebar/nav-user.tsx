@@ -61,7 +61,7 @@ export function NavUser() {
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">
                   {session?.user?.name && session.user.name.length > 0
-                    ? session.user.name.charAt(0).toUpperCase()
+                    ? session.user.name
                     : session?.user.email.charAt(0).toUpperCase()}
                 </span>
                 <span className="text-muted-foreground truncate text-xs">
@@ -114,7 +114,7 @@ export function NavUser() {
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link href="/courses">
+                <Link href="/admin/courses">
                   <Tv2 />
                   Courses
                 </Link>
