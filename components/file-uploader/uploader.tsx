@@ -12,6 +12,7 @@ import {
 } from "./render-state";
 import { toast } from "sonner";
 import { v4 as uuid4 } from "uuid";
+import { useConstructUrl } from "@/hooks/use-construct-url";
 
 interface UploaderProps {
   id: string | null;
@@ -31,6 +32,7 @@ interface Props {
 }
 
 export const Uploader = ({ value, onChange }: Props) => {
+  const fileUrl = useConstructUrl(value || "");
   const [fileState, setFileState] = useState<UploaderProps>({
     error: false,
     file: null,
@@ -40,6 +42,7 @@ export const Uploader = ({ value, onChange }: Props) => {
     isDeleting: false,
     fileType: "image",
     key: value,
+    objectUrl: fileUrl,
   });
 
   async function uploadFile(file: File) {
