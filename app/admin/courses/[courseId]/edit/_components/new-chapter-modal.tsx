@@ -67,7 +67,7 @@ export const NewChapterModal = ({ courseId }: { courseId: string }) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogTrigger>
+      <DialogTrigger asChild>
         <Button size="sm" variant="outline" className="gap-2">
           <PlusIcon className="size-4" /> New Chapter
         </Button>
