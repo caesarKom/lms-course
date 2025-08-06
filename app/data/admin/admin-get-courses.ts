@@ -2,6 +2,7 @@ import { db } from "@/lib/db";
 import { requireAdmin } from "./reguire-admin";
 
 export async function adminGetCourses() {
+  //await new Promise((resolve) => setTimeout(resolve, 10000));
   await requireAdmin();
 
   const data = await db.course.findMany({
