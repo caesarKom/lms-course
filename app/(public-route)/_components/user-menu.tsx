@@ -36,8 +36,15 @@ export default function UserMenu({ name, email, image }: UserProps) {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="h-auto p-0 hover:bg-transparent">
           <Avatar>
-            <AvatarImage src={image} alt="Profile image" />
-            <AvatarFallback>{name[0].toUpperCase()}</AvatarFallback>
+            <AvatarImage
+              src={image ?? `https://avatar.vercel.sh/${email}`}
+              alt="Profile image"
+            />
+            <AvatarFallback>
+              {name && name.length > 0
+                ? name.charAt(0).toUpperCase()
+                : email.charAt(0).toUpperCase()}
+            </AvatarFallback>
           </Avatar>
           <ChevronDownIcon
             size={16}
