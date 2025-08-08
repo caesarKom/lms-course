@@ -1,7 +1,7 @@
 import { getCourse } from "@/app/data/course/get-course";
+import { checkIfCourseBought } from "@/app/data/users/user-is-enrolled";
 import { RenderText } from "@/components/rich-text-editor/render-text";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Collapsible,
@@ -19,6 +19,9 @@ import {
 } from "@tabler/icons-react";
 import { CheckIcon } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
+import { EnrollmentButton } from "./_components/enrollment-button";
+import { buttonVariants } from "@/components/ui/button";
 
 type Params = Promise<{ slug: string }>;
 
@@ -26,6 +29,7 @@ export default async function CourseSlugPage({ params }: { params: Params }) {
   const { slug } = await params;
   const course = await getCourse(slug);
   const thumbnailUrl = `https://${process.env.NEXT_PUBLIC_S3_BUCKET_NAME}.t3.storageapi.dev/${course.fileKey}`;
+  const isEnrolled = await checkIfCourseBought(course.id);
 
   return (
     <div className="grid grid-cols-1 gap-8 lg:grid-cols-3 mt-5">
@@ -258,7 +262,17 @@ export default async function CourseSlugPage({ params }: { params: Params }) {
                 </ul>
               </div>
 
-              <Button className="w-full">Enroll Now!</Button>
+              {isEnrolled ? (
+                <Link
+                  className={buttonVariants({ className: "w-full" })}
+                  href="/dashboard"
+                >
+                  Watch Course
+                </Link>
+              ) : (
+                <EnrollmentButton courseId={course.id} />
+              )}
+
               <p className="mt-3 text-center text-xs text-muted-foreground">
                 30-day money-back gurantee
               </p>
