@@ -3,6 +3,7 @@
 import { requireAdmin } from "@/app/data/admin/reguire-admin";
 import arcjet, { fixedWindow } from "@/lib/arcjet";
 import { db } from "@/lib/db";
+import { stripe } from "@/lib/stripe";
 import { ApiResponse } from "@/lib/types";
 import { courseSchema, CourseSchemaType } from "@/lib/zod-schemas";
 import { request } from "@arcjet/next";
@@ -49,10 +50,20 @@ export async function CreateCourse(
       };
     }
 
+    const stripeData = await stripe.products.create({
+      name: validation.data.title,
+      description: validation.data.smallDescription,
+      default_price_data: {
+        currency: "usd",
+        unit_amount: validation.data.price * 100,
+      },
+    });
+
     await db.course.create({
       data: {
         ...validation.data,
         userId: session?.user.id as string,
+        stripePriceId: stripeData.default_price as string,
       },
     });
 
