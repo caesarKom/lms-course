@@ -1,14 +1,24 @@
+"use client";
+
 import { LessonContentType } from "@/app/data/course/get-lesson";
 import { RenderText } from "@/components/rich-text-editor/render-text";
 import { Button } from "@/components/ui/button";
+import { tryCatch } from "@/hooks/try-catch";
 import { useConstructUrl } from "@/hooks/use-construct-url";
 import { BookIcon, CheckCircleIcon } from "lucide-react";
+import { useTransition } from "react";
+import { markLessonComplete } from "../action";
+import { toast } from "sonner";
+import { useConfetti } from "@/hooks/use-confetti";
 
 interface Props {
   data: LessonContentType;
 }
 
 export const CourseContent = ({ data }: Props) => {
+  const [pending, startTransition] = useTransition();
+  const { triggerConfetti } = useConfetti();
+
   function VideoPlayer({
     thumbnailKey,
     videoKey,
@@ -46,6 +56,26 @@ export const CourseContent = ({ data }: Props) => {
     );
   }
 
+  function onSubmit() {
+    startTransition(async () => {
+      const { data: result, error } = await tryCatch(
+        markLessonComplete(data.id, data.chapter.course.slug)
+      );
+
+      if (error) {
+        toast.error("An unexpected error occurred. Please try again");
+        return;
+      }
+
+      if (result.status === "success") {
+        toast.success(result.message);
+        triggerConfetti();
+      } else if (result.status === "error") {
+        toast.error(result.message);
+      }
+    });
+  }
+
   return (
     <div className="flex flex-col h-full bg-background pl-6">
       <VideoPlayer
@@ -54,10 +84,17 @@ export const CourseContent = ({ data }: Props) => {
       />
 
       <div className="py-4 border-b">
-        <Button variant="outline">
-          <CheckCircleIcon className="size-4 mr-2 text-green-500" />
-          Mark as Complete
-        </Button>
+        {data.lessonProgress.length > 0 ? (
+          <Button variant="outline" className="bg-green-500/10 text-green-500">
+            <CheckCircleIcon className="size-4 mr-2 text-green-500" />
+            Completed
+          </Button>
+        ) : (
+          <Button variant="outline" onClick={onSubmit} disabled={pending}>
+            <CheckCircleIcon className="size-4 mr-2 text-green-500" />
+            Mark as Complete
+          </Button>
+        )}
       </div>
 
       <div className="space-y-3 pt-3">
